@@ -1,31 +1,26 @@
 # backend/app/agents/jd.py
-import httpx                                      # HTTP 요청 라이브러리
-from bs4 import BeautifulSoup                     # HTML 파싱
-from google import genai                           # Gemini API
-from app.core.config import settings              # 환경변수
-import json, re                                   # JSON 파싱, 정규식
-import io                                         # 바이트 스트림 처리
-
-# Gemini 클라이언트 초기화
-client = genai.Client(api_key=settings.gemini_api_key)
+import httpx
+from bs4 import BeautifulSoup
+from app.core.gemini import call_gemini
+import json, re, io
 
 def extract_text_from_pdf(content: bytes) -> str:
-    """PDF 바이트에서 텍스트 추출"""
-    import pypdf                                          # PDF 파싱 라이브러리
-    reader = pypdf.PdfReader(io.BytesIO(content))        # 바이트를 PDF로 읽기
-    return "\n".join(page.extract_text() for page in reader.pages)  # 전 페이지 텍스트 합치기
+    """PDF에서 텍스트 추출"""
+    import pypdf
+    reader = pypdf.PdfReader(io.BytesIO(content))
+    return "\n".join(page.extract_text() for page in reader.pages)
 
 def extract_text_from_docx(content: bytes) -> str:
-    """Word 파일 바이트에서 텍스트 추출"""
-    import docx                                          # Word 파싱 라이브러리
-    doc = docx.Document(io.BytesIO(content))             # 바이트를 Word로 읽기
-    return "\n".join(para.text for para in doc.paragraphs)  # 전 단락 텍스트 합치기
+    """Word 파일에서 텍스트 추출"""
+    import docx
+    doc = docx.Document(io.BytesIO(content))
+    return "\n".join(para.text for para in doc.paragraphs)
 
 async def fetch_jd_text(url: str) -> str:
+    """URL 형식에 따라 자동으로 파싱 방식 분기"""
     async with httpx.AsyncClient() as client:
         response = await client.get(url, timeout=10)
-    
-    # URL 끝 대신 실제 응답 타입으로 판단
+
     content_type = response.headers.get("content-type", "")
 
     if "pdf" in content_type:
@@ -35,22 +30,35 @@ async def fetch_jd_text(url: str) -> str:
     else:
         soup = BeautifulSoup(response.text, "html.parser")
         return soup.get_text(separator="\n", strip=True)
-    
-async def jd_agent(company: str, role: str, jd_url: str = None) -> dict:
-    """JD 분석 에이전트 — 핵심 역량, 기술스택, 우대사항 추출"""
 
-    if jd_url:
+async def jd_agent(
+    company: str,
+    role: str,
+    jd_url: str = None,
+    jd_file_text: str = None,        # 직무기술서 텍스트 추가
+) -> dict:
+    """JD 분석 에이전트"""
+
+    if jd_file_text:
+        # 직무기술서 파일이 있으면 우선 사용
+        source = f"""
+아래는 {company} {role} 직무기술서야.
+반드시 '{role}' 직무에 해당하는 내용만 찾아서 분석해줘.
+직무가 여러 개 있으면 '{role}'과 가장 유사한 것을 찾아줘.
+
+{jd_file_text[:5000]}
+"""
+    elif jd_url:
+        # URL이 있으면 스크래핑
         jd_text = await fetch_jd_text(jd_url)
         source = f"""
 아래는 {company} 채용 관련 문서야.
-이 문서에 여러 직무가 포함되어 있을 수 있어.
 반드시 '{role}' 직무에 해당하는 내용만 찾아서 분석해줘.
-'{role}' 직무 내용이 없으면 가장 유사한 직무를 찾아줘.
 
-문서 내용:
 {jd_text[:5000]}
-"""                                                      # 5000자로 제한 (토큰 절약)
+"""
     else:
+        # 둘 다 없으면 일반적인 분석
         source = f"{company}의 {role} 직무 채용공고를 기반으로 일반적인 요구사항을 분석해줘."
 
     prompt = f"""
@@ -66,13 +74,9 @@ async def jd_agent(company: str, role: str, jd_url: str = None) -> dict:
 JSON만 반환하고 다른 말은 하지 마.
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    text = response.text
-    match = re.search(r'\{.*\}', text, re.DOTALL)        # JSON 블록 추출
-    parsed = json.loads(match.group()) if match else {"raw": text}  # 파싱 실패시 원문 반환
+    text = call_gemini(prompt)
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    parsed = json.loads(match.group()) if match else {"raw": text}
 
     return {
         "agent": "jd",

@@ -1,11 +1,11 @@
 # backend/app/agents/experience.py
 import io                                         # 바이트 스트림 처리
-from google import genai                          # Gemini API
+from app.core.gemini import call_gemini                          # Gemini API
 from app.core.config import settings              # 환경변수
 import json, re                                   # JSON 파싱, 정규식
 
 
-client = genai.Client(api_key=settings.gemini_api_key)
+
 
 def extract_text_from_pdf(content: bytes) -> str:
     """PDF에서 텍스트 추출"""
@@ -72,11 +72,7 @@ async def experience_agent(
 JSON만 반환하고 다른 말은 하지 마.
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    text = response.text
+    text = call_gemini(prompt)
     match = re.search(r'\{.*\}', text, re.DOTALL)
     parsed = json.loads(match.group()) if match else {"keywords": [], "summary": text}
 

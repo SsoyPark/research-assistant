@@ -96,6 +96,59 @@ export default function ResultView({ data }: Props) {
         ))}
       </Section>
 
+      {/* 자소서 항목별 전략 */}
+      {strategy?.jasoseo_strategies && data.strategy?.jasoseo_items?.length > 0 && (
+        <Section title="📝 자소서 항목별 전략">
+          {data.strategy.jasoseo_items.map((item: string, i: number) => {
+            const s = strategy.jasoseo_strategies?.[String(i + 1)]
+            if (!s) return null
+            return (
+              <div key={i} style={{ marginBottom: '1.25rem', padding: '1rem',
+                background: '#f9f9f9', borderRadius: '10px' }}>
+                {/* 항목 원문 */}
+                <p style={{ fontSize: '0.8rem', color: '#888', margin: '0 0 8px',
+                  borderLeft: '3px solid #1a73e8', paddingLeft: '8px' }}>
+                  {item.length > 80 ? item.slice(0, 80) + '...' : item}
+                </p>
+                {/* 기업 의도 */}
+                <p style={{ fontSize: '0.8rem', fontWeight: '600', color: '#555', margin: '0 0 4px' }}>
+                  💡 기업이 보려는 것
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#444', margin: '0 0 10px', lineHeight: 1.6 }}>
+                  {s.intent}
+                </p>
+                {/* 전략 */}
+                <p style={{ fontSize: '0.8rem', fontWeight: '600', color: '#555', margin: '0 0 4px' }}>
+                  ✍️ 전략
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#444', margin: '0 0 10px', lineHeight: 1.6 }}>
+                  {s.strategy}
+                </p>
+                {/* 키워드 */}
+                <p style={{ fontSize: '0.8rem', fontWeight: '600', color: '#555', margin: '0 0 6px' }}>
+                  🔑 강조 키워드
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                  {s.keywords?.map((kw: string, j: number) => (
+                    <span key={j} style={{ padding: '3px 10px', borderRadius: '20px',
+                      background: '#e8f0fe', color: '#1a73e8', fontSize: '0.8rem' }}>
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+                {/* 주의사항 */}
+                <p style={{ fontSize: '0.8rem', fontWeight: '600', color: '#555', margin: '0 0 4px' }}>
+                  ⚠️ 주의할 점
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#888', margin: 0, lineHeight: 1.6 }}>
+                  {s.caution}
+                </p>
+              </div>
+            )
+          })}
+        </Section>
+      )}
+
       {/* 예상 면접 질문 */}
       <Section title="💬 예상 면접 질문">
         {strategy?.interview_questions?.map((q: string, i: number) => (

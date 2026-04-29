@@ -1,11 +1,11 @@
 # backend/app/agents/company.py
-from tavily import TavilyClient
+from app.core.gemini import call_gemini
 from app.core.config import settings
-from google import genai
+from tavily import TavilyClient
 import re
 
 client = TavilyClient(api_key=settings.tavily_api_key)
-gemini = genai.Client(api_key=settings.gemini_api_key)
+
 
 async def company_agent(company: str, role: str) -> dict:
     """기업 분석 에이전트 — 검색 후 Gemini로 요약"""
@@ -44,13 +44,9 @@ async def company_agent(company: str, role: str) -> dict:
 JSON만 반환하고 다른 말은 하지 마.
 """
 
-    response = gemini.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+    text = call_gemini(prompt)
 
     import json
-    text = response.text
     match = re.search(r'\{.*\}', text, re.DOTALL)
     parsed = json.loads(match.group()) if match else {"raw": text}
 

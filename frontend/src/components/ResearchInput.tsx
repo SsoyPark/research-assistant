@@ -1,19 +1,19 @@
 // frontend/src/components/ResearchInput.tsx
 import { useState, useRef } from 'react'
 
-
-// 파일 업로드가 추가되서 ResearchRequest 대신 별도 타입 사용
-interface FormData {
+interface ResearchFormData {
   company: string
   role: string
   jdUrl: string
-  experienceText: string   // 직접 입력한 경험 텍스트
-  file: File | null        // 첨부 파일
+  experienceText: string
+  files: File[]
+  jdFile: File | null
   depth: 'quick' | 'standard' | 'deep'
+  jasoseoItems: string[]
 }
 
 interface Props {
-  onSubmit: (formData: FormData) => void
+  onSubmit: (formData: ResearchFormData) => void
   loading: boolean
 }
 
@@ -21,23 +21,50 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
   const [company, setCompany] = useState('')
   const [role, setRole] = useState('')
   const [jdUrl, setJdUrl] = useState('')
-  const [experienceText, setExperienceText] = useState('')  // 경험 직접 입력
-  const [file, setFile] = useState<File | null>(null)       // 첨부 파일
+  const [experienceText, setExperienceText] = useState('')
+  const [files, setFiles] = useState<File[]>([])
+  const [jdFile, setJdFile] = useState<File | null>(null)
   const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>('standard')
-  const fileInputRef = useRef<HTMLInputElement>(null)        // 파일 input 참조
+  const [jasoseoItems, setJasoseoItems] = useState<string[]>([''])
+  const fileInputRef = useRef<HTMLInputElement>(null)   // 경험 파일
+  const jdFileRef = useRef<HTMLInputElement>(null)      // 직무기술서 파일
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] || null
-    setFile(selected)   // 선택된 파일 저장
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || [])
+    setFiles(prev => [...prev, ...selected])
+  }
+
+  const removeFile = (idx: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const handleJdFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setJdFile(e.target.files?.[0] || null)
+  }
+
+  const addJasoseoItem = () => {
+    setJasoseoItems(prev => [...prev, ''])
+  }
+
+  const removeJasoseoItem = (idx: number) => {
+    setJasoseoItems(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const updateJasoseoItem = (idx: number, value: string) => {
+    setJasoseoItems(prev => prev.map((item, i) => i === idx ? value : item))
   }
 
   const handleSubmit = () => {
     if (!company || !role) return
-    if (!experienceText && !file) {
+    if (!experienceText && files.length === 0) {
       alert('경험 텍스트를 입력하거나 파일을 첨부해주세요.')
       return
     }
-    onSubmit({ company, role, jdUrl, experienceText, file, depth })
+    onSubmit({
+      company, role, jdUrl, experienceText,
+      files, jdFile, depth,
+      jasoseoItems: jasoseoItems.filter(item => item.trim() !== '')
+    })
   }
 
   const depthLabels = { quick: '빠른 요약', standard: '표준', deep: '심층 분석' }
@@ -69,7 +96,7 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
 
       {/* JD URL */}
       <div style={{ marginBottom: '1rem' }}>
-        <label style={labelStyle}>JD URL <span style={{ color: '#aaa' }}>(선택)</span></label>
+        <label style={labelStyle}>채용공고 URL <span style={{ color: '#aaa' }}>(선택)</span></label>
         <input
           value={jdUrl}
           onChange={e => setJdUrl(e.target.value)}
@@ -78,17 +105,48 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
         />
       </div>
 
-      {/* 경험 입력 — 텍스트 + 파일 */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={labelStyle}>내 경험 입력 <span style={{ color: '#c00', fontSize: '0.75rem' }}>*둘 중 하나 필수</span></label>
+      {/* 직무기술서 파일 첨부 */}
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={labelStyle}>직무기술서 파일 <span style={{ color: '#aaa' }}>(선택)</span></label>
+        <div
+          onClick={() => jdFileRef.current?.click()}
+          style={{
+            border: '1.5px dashed #ddd', borderRadius: '8px', padding: '12px',
+            textAlign: 'center', cursor: 'pointer', background: 'white',
+            color: jdFile ? '#1a73e8' : '#aaa', fontSize: '0.875rem'
+          }}
+        >
+          {jdFile ? `📄 ${jdFile.name}` : '📄 직무기술서 PDF / DOCX 첨부'}
+        </div>
+        <input
+          ref={jdFileRef}
+          type="file"
+          accept=".pdf,.docx"
+          onChange={handleJdFileChange}
+          style={{ display: 'none' }}
+        />
+        {jdFile && (
+          <button
+            onClick={() => setJdFile(null)}
+            style={{ marginTop: '4px', fontSize: '0.75rem', color: '#c00',
+              background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            파일 제거
+          </button>
+        )}
+      </div>      
 
-        {/* 텍스트 직접 입력 */}
+      {/* 경험 입력 */}
+      <div style={{ marginBottom: '1rem' }}>
+        <label style={labelStyle}>
+          내 경험 입력 <span style={{ color: '#c00', fontSize: '0.75rem' }}>*텍스트 또는 파일 필수</span>
+        </label>
         <textarea
           value={experienceText}
           onChange={e => setExperienceText(e.target.value)}
-          placeholder={`경험을 자유롭게 입력해줘. 길수록 좋아!\n\n예시:\n- SKT AICC 프로젝트에서 RAG 기반 검색 품질 평가 담당. 대화 로그 확장 및 오류 패턴 분류 수행.\n- GPAA 프로젝트에서 에이전트 메모리 모듈(Facet) 평가 및 LLM 비교 평가. 레시피 검색 MRR 0.907→0.943 개선.\n- KT AIVLE Re:WEAR 팀 리더. AI 기반 의류 리폼 플랫폼 개발. 우수상 수상.`}
+          placeholder={`경험을 자유롭게 입력해줘. 길수록 좋아!\n\n예시:\n- SKT AICC 프로젝트에서 RAG 기반 검색 품질 평가 담당.\n- GPAA 프로젝트에서 에이전트 메모리 모듈(Facet) 평가. MRR 0.907→0.943 개선.\n- KT AIVLE Re:WEAR 팀 리더. AI 기반 의류 리폼 플랫폼 개발. 우수상 수상.`}
           rows={7}
-          style={{ ...inputStyle, resize: 'vertical' }}   // 세로 크기 조절 가능
+          style={{ ...inputStyle, resize: 'vertical' }}
         />
 
         {/* 구분선 */}
@@ -98,34 +156,83 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
           <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
         </div>
 
-        {/* 파일 첨부 */}
+        {/* 경험 파일 첨부 — 여러 개 */}
         <div
-          onClick={() => fileInputRef.current?.click()}   // 클릭시 파일 선택창 열기
+          onClick={() => fileInputRef.current?.click()}
           style={{
             border: '1.5px dashed #ddd', borderRadius: '8px', padding: '16px',
             textAlign: 'center', cursor: 'pointer', background: 'white',
-            color: file ? '#1a73e8' : '#aaa', fontSize: '0.875rem'
+            color: '#aaa', fontSize: '0.875rem'
           }}
         >
-          {file ? `📎 ${file.name}` : '📎 PDF / PPTX / DOCX 파일을 클릭해서 첨부'}
+          📎 포트폴리오 · 발표자료 PDF / PPTX / DOCX (여러 개 가능)
         </div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.pptx,.docx"                      // 허용 파일 형식
-          onChange={handleFileChange}
-          style={{ display: 'none' }}                    // 숨김 처리 (위 div로 대체)
+          accept=".pdf,.pptx,.docx"
+          multiple
+          onChange={handleFilesChange}
+          style={{ display: 'none' }}
         />
-        {/* 파일 선택 취소 */}
-        {file && (
-          <button
-            onClick={() => setFile(null)}
-            style={{ marginTop: '6px', fontSize: '0.75rem', color: '#c00',
-              background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            파일 제거
-          </button>
+
+        {/* 첨부된 경험 파일 목록 */}
+        {files.length > 0 && (
+          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {files.map((f, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', padding: '6px 10px', background: '#f0f4ff',
+                borderRadius: '6px', fontSize: '0.8rem', color: '#1a73e8' }}>
+                📎 {f.name}
+                <button
+                  onClick={() => removeFile(i)}
+                  style={{ background: 'none', border: 'none', color: '#c00',
+                    cursor: 'pointer', fontSize: '0.75rem' }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
         )}
+      </div>
+
+
+
+      {/* 자소서 항목 */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label style={labelStyle}>
+          자소서 항목 <span style={{ color: '#aaa' }}>(선택)</span>
+        </label>
+        <p style={{ fontSize: '0.75rem', color: '#aaa', margin: '0 0 8px' }}>
+          항목을 입력하면 항목별 맞춤 전략을 생성해줍니다
+        </p>
+        {jasoseoItems.map((item, idx) => (
+          <div key={idx} style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+            <input
+              value={item}
+              onChange={e => updateJasoseoItem(idx, e.target.value)}
+              placeholder="예: 지원동기를 작성하시오 / 본인의 강점과 경험을 인재상과 연결하여 서술하시오"
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            {jasoseoItems.length > 1 && (
+              <button
+                onClick={() => removeJasoseoItem(idx)}
+                style={{ padding: '0 10px', borderRadius: '8px', border: '1px solid #ddd',
+                  background: 'white', color: '#c00', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          onClick={addJasoseoItem}
+          style={{ marginTop: '4px', fontSize: '0.8rem', color: '#1a73e8',
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          + 항목 추가
+        </button>
       </div>
 
       {/* 리서치 깊이 */}
@@ -167,7 +274,6 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
   )
 }
 
-// 공통 스타일
 const labelStyle: React.CSSProperties = {
   fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px'
 }

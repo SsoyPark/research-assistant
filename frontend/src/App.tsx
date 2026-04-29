@@ -6,29 +6,29 @@ import { createResearch } from './api/client'
 import type { ResearchRequest } from './api/client'
 
 export default function App() {
-  const [data, setData] = useState<any>(null)          // 리서치 결과
-  const [loading, setLoading] = useState(false)        // 로딩 상태
-  const [error, setError] = useState<string | null>(null)  // 에러 메시지
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (formData: ResearchRequest) => {
     setLoading(true)
     setError(null)
     setData(null)
     try {
-      const result = await createResearch(formData)    // API 호출
-      setData(result)                                  // 결과 저장
+      const result = await createResearch(formData)
+      setData(result)
     } catch (e: any) {
       setError(e.response?.data?.detail || '오류가 발생했습니다.')
     } finally {
-      setLoading(false)                                // 로딩 종료
+      setLoading(false)
     }
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem' }}>
 
       {/* 헤더 */}
-      <div style={{ marginBottom: '2rem' }}>
+      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: '600', margin: '0 0 4px' }}>
           취준 리서치 어시스턴트
         </h1>
