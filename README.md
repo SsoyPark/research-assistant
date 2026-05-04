@@ -170,4 +170,4 @@ research-assistant/
 **박소영** · AI/ML Engineer
 
 - GitHub: [@SsoyPark](https://github.com/SsoyPark)
-- Velog: [@ssoypark](https://velog.io/@ssoypark)**
+- Velog: [@ssoypark](https://velog.io/@ssoypark)
