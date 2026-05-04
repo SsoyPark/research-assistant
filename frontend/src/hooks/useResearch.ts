@@ -1,27 +1,60 @@
 // frontend/src/hooks/useResearch.ts
 import { useState } from 'react'
-import { createResearch } from '../api/client'  // API 클라이언트
+import { streamResearch } from '../api/client'
 import type { ResearchRequest } from '../api/client'
+import { useHistory } from './useHistory'                
+
+export interface ResearchStatus {
+  message: string
+  step: number
+  total: number
+}
 
 export function useResearch() {
-  const [data, setData] = useState<any>(null)       // 리서치 결과 데이터
-  const [loading, setLoading] = useState(false)     // 로딩 상태
-  const [error, setError] = useState<string | null>(null)  // 에러 메시지
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState<ResearchStatus | null>(null)
+  const { saveHistory } = useHistory()                   
 
   const runResearch = async (req: ResearchRequest) => {
-    setLoading(true)   // 로딩 시작
-    setError(null)     // 이전 에러 초기화
-    setData(null)      // 이전 결과 초기화
+    setLoading(true)
+    setError(null)
+    setData(null)
+    setStatus(null)
 
     try {
-      const result = await createResearch(req)  // API 호출
-      setData(result)                           // 결과 저장
+      await streamResearch(req, (event, eventData) => {
+        switch (event) {
+          case 'status':
+            setStatus(eventData)
+            break
+          case 'done':
+            setData(eventData)
+            setStatus(null)
+            saveHistory(eventData)                       // 완료되면 자동 저장
+            break
+          case 'error':
+            setError(eventData.message)
+            break
+        }
+      })
     } catch (e: any) {
-      setError(e.response?.data?.detail || '오류가 발생했습니다.')  // 에러 저장
+      setError(e.message || '오류가 발생했습니다.')
     } finally {
-      setLoading(false)  // 로딩 종료 (성공/실패 무관)
+      setLoading(false)
     }
   }
 
-  return { data, loading, error, runResearch }  // 컴포넌트에서 사용할 값들 반환
+  const reset = () => {
+    setData(null)
+    setError(null)
+    setStatus(null)
+  }
+
+  const loadHistory = (historyData: any) => {
+    setData(historyData)           // 히스토리 데이터를 결과로 바로 표시
+  }
+
+  return { data, loading, error, status, runResearch, reset, loadHistory }
 }

@@ -1,5 +1,7 @@
 // frontend/src/components/ResultView.tsx
 
+import DraftView from './DraftView'
+
 interface Props {
   data: any
 }
@@ -11,7 +13,7 @@ export default function ResultView({ data }: Props) {
   const experience = data.experience_analysis
 
   return (
-    <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div id="result-content" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
       {/* 헤더 */}
       <div style={{ padding: '1rem 1.25rem', background: '#e8f0fe', borderRadius: '12px' }}>
@@ -23,11 +25,11 @@ export default function ResultView({ data }: Props) {
       {experience && (
         <Section title="👤 내 경험 분석">
           <p style={descStyle}>{experience.summary}</p>
-          <p style={{ ...labelStyle, marginTop: '0.75rem' }}>추출된 핵심 키워드</p>
+          <p style={{ ...labelStyle, marginTop: '1rem' }}>추출된 핵심 키워드</p>
           <TagList items={experience.keywords} color="#e8f0fe" textColor="#1a73e8" />
           {experience.strengths?.length > 0 && (
             <>
-              <p style={{ ...labelStyle, marginTop: '0.75rem' }}>강점</p>
+              <p style={{ ...labelStyle, marginTop: '1rem' }}>강점</p>
               {experience.strengths.map((s: string, i: number) => (
                 <p key={i} style={bulletStyle}>• {s}</p>
               ))}
@@ -47,13 +49,13 @@ export default function ResultView({ data }: Props) {
           )}
           {company.ai_strategy && (
             <>
-              <p style={{ ...labelStyle, marginTop: '0.75rem' }}>AI 전략</p>
+              <p style={{ ...labelStyle, marginTop: '1rem' }}>AI 전략</p>
               <p style={descStyle}>{company.ai_strategy}</p>
             </>
           )}
           {company.key_info?.length > 0 && (
             <>
-              <p style={{ ...labelStyle, marginTop: '0.75rem' }}>지원자 필수 정보</p>
+              <p style={{ ...labelStyle, marginTop: '1rem' }}>지원자 필수 정보</p>
               {company.key_info.map((info: string, i: number) => (
                 <p key={i} style={bulletStyle}>• {info}</p>
               ))}
@@ -66,11 +68,11 @@ export default function ResultView({ data }: Props) {
       <Section title="📋 JD 분석">
         <p style={labelStyle}>필수 기술</p>
         <TagList items={jd?.required_skills} color="#fff0f0" textColor="#c00" />
-        <p style={{ ...labelStyle, marginTop: '0.75rem' }}>우대 기술</p>
+        <p style={{ ...labelStyle, marginTop: '1rem' }}>우대 기술</p>
         <TagList items={jd?.preferred_skills} color="#f0fff0" textColor="#060" />
-        <p style={{ ...labelStyle, marginTop: '0.75rem' }}>핵심 역량</p>
+        <p style={{ ...labelStyle, marginTop: '1rem' }}>핵심 역량</p>
         <TagList items={jd?.key_competencies} color="#f5f0ff" textColor="#606" />
-        <p style={{ ...labelStyle, marginTop: '0.75rem' }}>직무 요약</p>
+        <p style={{ ...labelStyle, marginTop: '1rem' }}>직무 요약</p>
         <p style={descStyle}>{jd?.summary}</p>
       </Section>
 
@@ -78,19 +80,24 @@ export default function ResultView({ data }: Props) {
       <Section title="🎯 갭 분석">
         <p style={labelStyle}>✅ 매칭되는 키워드</p>
         <TagList items={strategy?.matched_keywords} color="#e8f0fe" textColor="#1a73e8" />
-        <p style={{ ...labelStyle, marginTop: '0.75rem' }}>⚠️ 보완 필요</p>
+        <p style={{ ...labelStyle, marginTop: '1rem' }}>⚠️ 보완 필요</p>
         <TagList items={strategy?.gap_keywords} color="#fff0f0" textColor="#c00" />
       </Section>
 
       {/* 자소서 전략 */}
       <Section title="✍️ 자소서 어필 포인트">
         {strategy?.appeal_points?.map((point: string, i: number) => (
-          <div key={i} style={{ marginBottom: '1rem' }}>
-            <p style={{ fontWeight: '600', fontSize: '0.875rem', margin: '0 0 4px', color: '#1a73e8' }}>
+          <div key={i} style={{ marginBottom: '1.25rem', padding: '1rem',
+            background: '#f9f9f9', borderRadius: '10px' }}>
+            {/* 어필 포인트 제목 */}
+            <p style={{ fontWeight: '600', fontSize: '0.9rem',
+              margin: '0 0 8px', color: '#1a73e8', textAlign: 'left' }}>
               {i + 1}. {point}
             </p>
-            <p style={{ ...descStyle, background: '#f9f9f9', padding: '8px 12px', borderRadius: '8px' }}>
-              {strategy?.recommended_experiences?.[point]}
+            {/* 연결할 경험 설명 */}
+            <p style={{ fontSize: '0.85rem', color: '#444', margin: 0,
+              lineHeight: 1.6, textAlign: 'left' }}>
+              {strategy?.recommended_experiences?.[point] || ''}
             </p>
           </div>
         ))}
@@ -159,6 +166,8 @@ export default function ResultView({ data }: Props) {
         ))}
       </Section>
 
+      <DraftView data={data} />
+
     </div>
   )
 }
@@ -176,8 +185,8 @@ const bulletStyle: React.CSSProperties = {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ border: '1px solid #eee', borderRadius: '12px', padding: '1.25rem' }}>
-      <h3 style={{ margin: '0 0 1rem', fontSize: '0.95rem' }}>{title}</h3>
+    <div className="print-section" style={{ background: 'white', border: '1px solid #eee', borderRadius: '12px', padding: '1.5rem' }}>
+      <h3 style={{ margin: '0 0 1.2rem', fontSize: '0.95rem' }}>{title}</h3>
       {children}
     </div>
   )
@@ -186,7 +195,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function TagList({ items, color, textColor }: { items: string[]; color: string; textColor: string }) {
   if (!items?.length) return <p style={{ fontSize: '0.8rem', color: '#aaa' }}>없음</p>
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
       {items.map((item, i) => (
         <span key={i} style={{
           padding: '4px 10px', borderRadius: '20px',

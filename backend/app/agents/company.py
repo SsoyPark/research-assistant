@@ -2,7 +2,7 @@
 from app.core.gemini import call_gemini
 from app.core.config import settings
 from tavily import TavilyClient
-import re
+
 
 client = TavilyClient(api_key=settings.tavily_api_key)
 
@@ -44,11 +44,10 @@ async def company_agent(company: str, role: str) -> dict:
 JSON만 반환하고 다른 말은 하지 마.
 """
 
-    text = call_gemini(prompt)
+    from app.core.gemini import call_gemini, parse_json_response
 
-    import json
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    parsed = json.loads(match.group()) if match else {"raw": text}
+    text = call_gemini(prompt)
+    parsed = parse_json_response(text)
 
     return {
         "agent": "company",

@@ -5,6 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>frontend</title>
+    <style>
+      @media print {
+        /* 헤더 숨기기 */
+        header, nav { display: none !important; }
+        /* 배경색 유지 */
+        * { -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; }
+        /* 여백 조정 */
+        body { margin: 0; padding: 0; }
+        /* 버튼 숨기기 */
+        button { display: none !important; }
+        /* 페이지 나눔 방지 */
+        .section { break-inside: avoid; }
+        .draft-result-hidden { display: none !important; }
+
+        /* 섹션 중간에서 페이지 나눔 방지 */
+        .print-section { break-inside: avoid; }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

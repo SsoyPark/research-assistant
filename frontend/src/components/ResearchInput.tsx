@@ -70,7 +70,8 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
   const depthLabels = { quick: '빠른 요약', standard: '표준', deep: '심층 분석' }
 
   return (
-    <div style={{ background: '#f9f9f9', borderRadius: '12px', padding: '1.5rem' }}>
+    <div style={{ background: 'white', borderRadius: '12px', padding: '2rem', 
+    boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
 
       {/* 기업 */}
       <div style={{ marginBottom: '1rem' }}>
@@ -238,7 +239,7 @@ export default function ResearchInput({ onSubmit, loading }: Props) {
       {/* 리서치 깊이 */}
       <div style={{ marginBottom: '1.5rem' }}>
         <label style={labelStyle}>리서치 깊이</label>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           {(['quick', 'standard', 'deep'] as const).map(d => (
             <button
               key={d}

@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.research import router 
+from app.api.draft import router as draft_router
 
 app = FastAPI(title="Research Assistant API")      # FastAPI 앱 인스턴스 생성
 
@@ -14,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(draft_router) 
 
 @app.get("/")                # GET / 요청이 오면 아래 함수 실행
 def health_check():

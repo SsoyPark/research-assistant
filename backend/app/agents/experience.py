@@ -2,7 +2,6 @@
 import io                                         # 바이트 스트림 처리
 from app.core.gemini import call_gemini                          # Gemini API
 from app.core.config import settings              # 환경변수
-import json, re                                   # JSON 파싱, 정규식
 
 
 
@@ -72,9 +71,10 @@ async def experience_agent(
 JSON만 반환하고 다른 말은 하지 마.
 """
 
+    from app.core.gemini import call_gemini, parse_json_response
+
     text = call_gemini(prompt)
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    parsed = json.loads(match.group()) if match else {"keywords": [], "summary": text}
+    parsed = parse_json_response(text)
 
     return {
         "agent": "experience",

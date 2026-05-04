@@ -2,7 +2,7 @@
 import httpx
 from bs4 import BeautifulSoup
 from app.core.gemini import call_gemini
-import json, re, io
+import io
 
 def extract_text_from_pdf(content: bytes) -> str:
     """PDF에서 텍스트 추출"""
@@ -74,9 +74,10 @@ async def jd_agent(
 JSON만 반환하고 다른 말은 하지 마.
 """
 
+    from app.core.gemini import call_gemini, parse_json_response
+
     text = call_gemini(prompt)
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    parsed = json.loads(match.group()) if match else {"raw": text}
+    parsed = parse_json_response(text)
 
     return {
         "agent": "jd",
