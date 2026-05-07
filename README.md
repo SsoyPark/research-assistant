@@ -169,10 +169,10 @@ research-assistant/
 
 [클로드로 개발하기] 시리즈로 개발 과정을 기록하고 있습니다.
 
-- [1편 — 멀티에이전트 파이프라인 설계 및 구현](https://velog.io/@ssoypark)
-- [2편 — 자소서 항목별 전략 + 파일 업로드](https://velog.io/@ssoypark)
-- [3편 — SSE 스트리밍 + UX 개선](https://velog.io/@ssoypark)
-- [4편 — 자소서 첨삭 기능](https://velog.io/@ssoypark) 
+- [1편 — 멀티에이전트 파이프라인 설계 및 구현](https://velog.io/@ssoypark/클로드로-개발하기-리서치-어시스턴트-1)
+- [2편 — 자소서 항목별 전략 + 파일 업로드](https://velog.io/@ssoypark/클로드로-개발하기-리서치-어시스턴트-2)
+- [3편 — SSE 스트리밍 + UX 개선](https://velog.io/@ssoypark/클로드로-개발하기-리서치-어시스턴트-3)
+- [4편 — 자소서 첨삭 기능](https://velog.io/@ssoypark/클로드로-개발하기-리서치-어시스턴트-4) 
 
 ---
 
