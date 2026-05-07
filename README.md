@@ -12,8 +12,7 @@
 
 ## 데모 영상
 
-[[![데모 영상](https://cdn.loom.com/sessions/thumbnails/2c0f2a3a08f04182aaf59afb6602ba6a-with-play.gif)](https://www.loom.com/share/2c0f2a3a08f04182aaf59afb6602ba6a)
-](https://www.loom.com/share/2c0f2a3a08f04182aaf59afb6602ba6a)
+https://www.loom.com/share/2c0f2a3a08f04182aaf59afb6602ba6a
 
 ---
 
