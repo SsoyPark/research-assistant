@@ -28,6 +28,7 @@ https://www.loom.com/share/2c0f2a3a08f04182aaf59afb6602ba6a
 
 - **멀티에이전트 파이프라인** — 경험 분석 → 기업/JD 분석(병렬) → 전략 생성 순차 실행
 - **자소서 항목별 맞춤 전략** — 항목 입력 시 기업 의도 파악 + 경험 연결 전략 생성
+- **자소서 첨삭** — 내가 쓴 초안을 AI가 피드백 + 수정본 생성 + 전체 결과 복사
 - **파일 업로드** — 포트폴리오/발표자료 PDF·PPTX·DOCX 다중 업로드, 직무기술서 별도 첨부
 - **SSE 스트리밍** — 에이전트 단계별 실시간 진행 상태 표시
 - **히스토리 저장** — 분석 결과 자동 저장 + 재조회
@@ -137,8 +138,10 @@ research-assistant/
 │   │   │   ├── company.py        # 기업 분석
 │   │   │   ├── jd.py             # JD 분석
 │   │   │   └── strategy.py       # 자소서 전략
+│   │   │   └── draft.py          # 자소서 첨삭
 │   │   ├── api/
 │   │   │   └── research.py       # SSE 엔드포인트
+│   │   │   └── draft.py          # 첨삭 엔드포인트
 │   │   ├── core/
 │   │   │   ├── config.py         # 환경변수
 │   │   │   └── gemini.py         # Gemini 공통 모듈
@@ -150,6 +153,7 @@ research-assistant/
     │   ├── components/
     │   │   ├── ResearchInput.tsx  # 입력 폼
     │   │   ├── ResultView.tsx     # 결과 화면
+    │   │   ├── DraftView.tsx      # 자소서 첨삭
     │   │   └── HistoryPanel.tsx   # 히스토리
     │   ├── hooks/
     │   │   ├── useResearch.ts     # API + 상태 관리
@@ -168,6 +172,7 @@ research-assistant/
 - [1편 — 멀티에이전트 파이프라인 설계 및 구현](https://velog.io/@ssoypark)
 - [2편 — 자소서 항목별 전략 + 파일 업로드](https://velog.io/@ssoypark)
 - [3편 — SSE 스트리밍 + UX 개선](https://velog.io/@ssoypark)
+- [4편 — 자소서 첨삭 기능](https://velog.io/@ssoypark) 
 
 ---
 
